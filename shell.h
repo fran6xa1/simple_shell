@@ -68,3 +68,47 @@ int _getline(char **line_ptr, size_t *n, int file);
 char *evaluate_variables(const char *argument);
 
 size_t custom_strlen(const char *str);
+
+char *custom_strdup(const char *src);
+
+char *concat_strings(const char *str1, const char *str2);
+
+int compare_strings(const char *string1, const char *string2, int match_mode);
+
+int my_free_string_array(char **string_array);
+
+char **split_string(const char *str, char delim, char **if_sep);
+
+int my_list_length(char **list, const char *prefix);
+
+char **my_copy_array(char **old_array, int new_size);
+
+int my_free_array(char **array);
+
+int my_setenv(const char *variable_name, const char *variable_value);
+
+int my_unsetenv(const char *variable_name);
+
+int my_change_directory(char *directory_name);
+
+int my_alias_function(char **arguments, int to_free);
+
+int free_alias_list(Alias *head);
+
+int substitute_alias(char **command, Alias *alias_list);
+
+int print_alias_list(Alias *alias_list);
+
+int print_alias_value(char *argument, Alias *alias_list);
+
+int update_alias_value(Alias *alias_list, char *alias_name, char *new_alias_value);
+
+char *convert_int_to_string(int num);
+
+int my_print_environment(void);
+
+char *int_to_string(int number);
+
+int string_to_int(const char *s);
+
+#endif
