@@ -70,8 +70,8 @@ int my_unsetenv(const char *variable_name)
 
 	if (index == -1)
 	{
-		bytes_written = write(STDERR_FILENO, "my_unsetenv: variable not
-				      found\n", 33);
+		bytes_written = write(STDERR_FILENO, "my_unsetenv: variable not found\n", 33);
+
 		(void)bytes_written;
 		status = 2;
 				      return (SKIP_FORK);
@@ -148,8 +148,7 @@ int my_change_directory(char *directory_name)
 		{
 			bytes_written = write(STDOUT_FILENO,
 					      previous_working_directory,
-					      custom_strlen(previous_working_
-							    directory));
+					      custom_strlen(previous_working_directory));
 			(void)bytes_written;
 			bytes_written = write(STDOUT_FILENO, "\n", 1);
 			setenv("PWD", (const char *)
@@ -175,36 +174,65 @@ int my_change_directory(char *directory_name)
 
 	return (SKIP_FORK);
 }
-or = FALSE;
-}
-else
-	{
-		*char_pointer = '\0';
-		char_pointer++;
-		update_alias_value(&alias_head, *arguments, char_pointer);
-		*(char_pointer - 1) = '=';
-	}
-arguments++;
-}
-
-if (no_error == FALSE)
-	return (SKIP_FORK);
-
-status = 0;
-return (SKIP_FORK);
-}
-
 /**
  * my_print_environment - Print the environment variables.
  *
  * Return: SKIP_FORK if successful, or an error code on failure.
  */
+
+int my_alias_function(char **arguments, int to_free)
+{
+    static Alias alias_head = {NULL, NULL, NULL};
+    char *char_pointer;
+    int no_error = 1;
+    char *equals;
+  
+    if (to_free) {
+        return free_alias_list(alias_head.next_alias);
+    }
+
+    if (compare_strings("alias", *arguments, MATCH) != 1) {
+        return substitute_alias(arguments, alias_head.next_alias);
+    }
+
+    arguments++;
+
+    if (*arguments == NULL) {
+        return print_alias_list(alias_head.next_alias);
+    }
+
+    while (*arguments != NULL) {
+        char_pointer = *arguments;
+        equals = strchr(char_pointer, '=');
+
+        if (!equals || equals == char_pointer) {
+            if (print_alias_value(*arguments, &alias_head) == 0) {
+                no_error = 0;
+            }
+        } else {
+            *equals = '\0';
+            equals++;
+            update_alias_value(&alias_head, char_pointer, equals);
+            *(equals - 1) = '=';
+        }
+        arguments++;
+    }
+
+    if (no_error == 0) {
+        return SKIP_FORK;
+    }
+
+    status = 0;
+    return SKIP_FORK;
+}
+
 int my_print_environment(void)
 {
-	char **env_pointer = environ;
+	char **env_pointer;
 	ssize_t bytes_written;
 	ssize_t newline_written;
-
+	
+	env_pointer = environ;
 	while (*env_pointer != NULL)
 	{
 	    bytes_written = write(STDOUT_FILENO, *env_pointer,

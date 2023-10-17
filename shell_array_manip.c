@@ -127,8 +127,8 @@ int my_list_length(char **list, const char *prefix)
 		}
 		length++;
 	}
-	else
-}
+	else 
+	{
 		while (*list != NULL)
 		{
 			if (compare_strings(*list, prefix, PREFIX) == TRUE)
@@ -140,7 +140,6 @@ int my_list_length(char **list, const char *prefix)
 		}
 		return (-1);
 	}
-
 	return (length);
 }
 
