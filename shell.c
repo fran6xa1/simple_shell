@@ -1,19 +1,21 @@
 #include "shell.h"
 
-int status = 0;
+/**
+ * write_stdout - executes commands from the terminal
+ * @str: - string
+ * @len: - length
+ */
 
-int line_num = 1;
-
-char *shell_name = NULL;
-
-void write_stdout(const char *str, size_t len) 
+void write_stdout(const char *str, size_t len)
 {
-    ssize_t bytes_written = write(STDOUT_FILENO, str, len);
-    if (bytes_written == -1) 
-    {
-        perror("write");
-        exit(EXIT_FAILURE);
-    }
+
+	ssize_t bytes_written = write(STDOUT_FILENO, str, len);
+
+	if (bytes_written == -1)
+	{
+		perror("write");
+		exit(EXIT_FAILURE);
+	}
 }
 
 
@@ -24,6 +26,11 @@ void write_stdout(const char *str, size_t len)
  *
  * Return: 0, or another number if desired
  */
+int main(__attribute__((unused))int ac, char **av);
+int status = 0;
+int line_num = 1;
+char *shell_name = NULL;
+
 int main(__attribute__((unused))int ac, char **av)
 {
 	int bytes_read;
@@ -34,6 +41,7 @@ int main(__attribute__((unused))int ac, char **av)
 	char *buf_ptr;
 	char *buf_tmp;
 	char **args = NULL;
+
 	shell_name = custom_strdup(*av);
 
 	environ = my_copy_array(environ, my_list_length(environ, NULL));
@@ -49,7 +57,7 @@ int main(__attribute__((unused))int ac, char **av)
 		if (is_separated == FALSE)
 		{
 			if (isatty(STDIN_FILENO) == 1)
-			 write_stdout("my_shell$ ", 10);
+			write_stdout("my_shell$ ", 10);
 
 			bytes_read = getline(&buf, &buf_size, stdin);
 

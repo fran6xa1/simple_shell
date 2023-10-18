@@ -69,7 +69,6 @@ char *sanitize_input(char *input_buffer, size_t *input_size)
  * unexpected characters.
  * @input: The input string to check.
  *
- * Return: 1 if unexpected characters are found, 0 if the input is clean.
  */
 int has_unexpected_chars(const char *input)
 {

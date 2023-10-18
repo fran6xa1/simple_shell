@@ -143,8 +143,10 @@ int print_alias_value(char *argument, Alias *alias_list)
  *
  * Return: TRUE if successful, FALSE on failure.
  */
-int update_alias_value(Alias *alias_list, const char *alias_name, const char *new_alias_value);
-int update_alias_value(Alias *alias_list, const char *alias_name, const char *new_alias_value)
+int update_alias_value(Alias *alias_list,
+		const char *alias_name, const char *new_alias_value);
+int update_alias_value(Alias *alias_list,
+		const char *alias_name, const char *new_alias_value)
 {
 	Alias *current_alias = alias_list;
 	Alias *prev_alias = NULL;

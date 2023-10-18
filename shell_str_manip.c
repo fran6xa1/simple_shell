@@ -66,7 +66,8 @@
  *
  * Return: a pointer to the new string, or NULL if failure
  */
-	char *concat_strings(const char *str1, const char *str2)
+char *concat_strings(const char *str1, const char *str2);
+char *concat_strings(const char *str1, const char *str2)
 {
 	size_t len1;
 	size_t len2;
