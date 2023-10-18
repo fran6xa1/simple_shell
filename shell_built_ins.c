@@ -182,48 +182,57 @@ int my_change_directory(char *directory_name)
 
 int my_alias_function(char **arguments, int to_free)
 {
-    static Alias alias_head = {NULL, NULL, NULL};
-    char *char_pointer;
-    int no_error = 1;
-    char *equals;
-  
-    if (to_free) {
-        return free_alias_list(alias_head.next_alias);
-    }
+	static Alias alias_head = {NULL, NULL, NULL};
+	char *char_pointer;
+	int no_error = 1;
+	char *equals;
 
-    if (compare_strings("alias", *arguments, MATCH) != 1) {
-        return substitute_alias(arguments, alias_head.next_alias);
-    }
+	if (to_free)
+	{
+		return (free_alias_list(alias_head.next_alias));
+	}
 
-    arguments++;
+	if (compare_strings("alias", *arguments, MATCH) != 1)
+	{
+		return (substitute_alias(arguments, alias_head.next_alias));
+	}
 
-    if (*arguments == NULL) {
-        return print_alias_list(alias_head.next_alias);
-    }
+	arguments++;
 
-    while (*arguments != NULL) {
-        char_pointer = *arguments;
-        equals = strchr(char_pointer, '=');
+	if (*arguments == NULL)
+	{
+		return (print_alias_list(alias_head.next_alias));
+	}
 
-        if (!equals || equals == char_pointer) {
-            if (print_alias_value(*arguments, &alias_head) == 0) {
-                no_error = 0;
-            }
-        } else {
-            *equals = '\0';
-            equals++;
-            update_alias_value(&alias_head, char_pointer, equals);
-            *(equals - 1) = '=';
-        }
-        arguments++;
-    }
+	while (*arguments != NULL)
+	{
+		char_pointer = *arguments;
+		equals = strchr(char_pointer, '=');
 
-    if (no_error == 0) {
-        return SKIP_FORK;
-    }
+		if (!equals || equals == char_pointer)
+		{
+			if (print_alias_value(*arguments, &alias_head) == 0)
+			{
+				no_error = 0;
+			}
+		}
+		else
+		{
+			*equals = '\0';
+			equals++;
+			update_alias_value(&alias_head, char_pointer, equals);
+			*(equals - 1) = '=';
+		}
+		arguments++;
+	}
 
-    status = 0;
-    return SKIP_FORK;
+	if (no_error == 0)
+	{
+		return (SKIP_FORK);
+	}
+
+	status = 0;
+	return (SKIP_FORK);
 }
 
 int my_print_environment(void)
@@ -231,7 +240,7 @@ int my_print_environment(void)
 	char **env_pointer;
 	ssize_t bytes_written;
 	ssize_t newline_written;
-	
+
 	env_pointer = environ;
 	while (*env_pointer != NULL)
 	{
