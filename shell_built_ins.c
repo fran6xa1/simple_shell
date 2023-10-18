@@ -1,4 +1,4 @@
-#include "shell.OAh"
+#include "shell.h"
 
 /**
  * my_setenv - Set an environment variable with a given name and value.
@@ -107,7 +107,7 @@ int my_change_directory(char *directory_name)
 	char old_path_buffer[PATH_MAX];
 	char new_path_buffer[PATH_MAX];
 	size_t buffer_size = PATH_MAX;
-	int result;
+	int result = 0;
 
 	if (getcwd(old_path_buffer, buffer_size) == NULL)
 	{
