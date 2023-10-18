@@ -157,7 +157,6 @@ int update_alias_value(Alias *alias_list,
 		prev_alias = current_alias;
 		current_alias = current_alias->next_alias;
 	}
-
 	if (current_alias != NULL)
 	{
 		free(current_alias->alias_value);
@@ -170,17 +169,14 @@ int update_alias_value(Alias *alias_list,
 		{
 			return (FALSE);
 		}
-
 		current_alias->alias_name = custom_strdup(alias_name);
 		if (current_alias->alias_name == NULL)
 		{
 			free(current_alias);
 			return (FALSE);
 		}
-
 		current_alias->alias_value = custom_strdup(new_alias_value);
 		current_alias->next_alias = NULL;
-
 		if (prev_alias != NULL)
 		{
 			prev_alias->next_alias = current_alias;
