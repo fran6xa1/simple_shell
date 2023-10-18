@@ -1,8 +1,8 @@
 #include "shell.h"
 
 /**
- * my_get_array_element - Get an element from an array
- * that matches a name prefix.
+ * my_get_array_element - Get an element from an array that matches a name
+ * prefix.
  * @array: The array to search in.
  * @element_prefix: The prefix to match against elements in the array.
  *
@@ -27,11 +27,19 @@ char *my_get_array_element(char **array, const char *element_prefix)
  * my_free_string_array - Free an array of strings and its memory.
  * @string_array: The array of strings to free.
  *
- * Return: TRUE if successful.
+ * Return: TRUE if successful, FALSE if there's an error.
  */
 int my_free_string_array(char **string_array)
 {
 	char **ptr = string_array;
+
+
+	if (string_array == NULL)
+	{
+		return (FALSE);
+	}
+
+	ptr = string_array;
 
 	while (*ptr != NULL)
 	{
@@ -44,17 +52,17 @@ int my_free_string_array(char **string_array)
 	return (TRUE);
 }
 
-
-
 /**
- * split_string - Split a string into an array using a
- * delimiter and return the next position if it's a separator.
+ * split_string - Split a string into an array using a delimiter and return
+ * the next position if it's a separator.
  * @str: The string to split.
  * @delim: The delimiter character.
  * @if_sep: Pointer to the position of the next character after a separator.
  *
- * Return: A dynamically allocated array of strings.
+ * Return: A dynamically allocated array of strings or NULL on memory
+ * allocation failure.
  */
+char **split_string(const char *str, char delim, char **if_sep);
 char **split_string(const char *str, char delim, char **if_sep)
 {
 	const char *str_ptr = str;
@@ -72,7 +80,9 @@ char **split_string(const char *str, char delim, char **if_sep)
 
 	array = (char **)malloc(i * sizeof(char *));
 	if (array == NULL)
-		exit(EXIT_FAILURE);
+	{
+		return (NULL);
+	}
 
 	array[0] = (char *)str;
 	str_ptr = str;
@@ -86,7 +96,8 @@ char **split_string(const char *str, char delim, char **if_sep)
 			if (*str_ptr == ';')
 			{
 				array[i] = NULL;
-				if (*(str_ptr + 1) != '\0' && *(str_ptr + 2) != '\0')
+				if (*(str_ptr + 1) != '\0' && *(str_ptr + 2)
+				    != '\0')
 				{
 					*if_sep = (char *)(str_ptr + 2);
 				}
@@ -106,8 +117,8 @@ char **split_string(const char *str, char delim, char **if_sep)
 }
 
 /**
- * my_list_length - Calculate the length of a list with an
- * optional prefix match.
+ * my_list_length - Calculate the length of a list with an optional prefix
+ * match.
  * @list: The list to calculate the length of.
  * @prefix: The prefix to match against elements in the list
  * (or NULL for the full list).
@@ -125,7 +136,6 @@ int my_list_length(char **list, const char *prefix)
 			length++;
 			list++;
 		}
-		length++;
 	}
 	else
 	{
@@ -140,25 +150,39 @@ int my_list_length(char **list, const char *prefix)
 		}
 		return (-1);
 	}
+
 	return (length);
 }
 
 /**
- * my_copy_array - Copy an array of strings
- * to a new array of the specified size.
+ * my_copy_array - Copy an array of strings to a new array of the specified
+ * size.
  * @old_array: The original array of strings to copy.
  * @new_size: The size of the new array.
  *
- * Return: A dynamically allocated new array of strings.
+ * Return: A dynamically allocated new array of strings or NULL on memory
+ * allocation failure.
  */
 char **my_copy_array(char **old_array, int new_size)
 {
-	char **new_array = (char **)malloc(sizeof(char *) * new_size);
-	char **ptr_array = new_array;
+	char **new_array;
+	char **ptr_array;
+
+	new_array = (char **)malloc(sizeof(char *) * new_size);
+	if (new_array == NULL)
+	{
+		return (NULL);
+	}
+
+	ptr_array = new_array;
 
 	while (*old_array != NULL)
 	{
 		*ptr_array = custom_strdup(*old_array);
+		if (*ptr_array == NULL)
+		{
+			return (NULL);
+		}
 		ptr_array++;
 		old_array++;
 	}
@@ -166,4 +190,3 @@ char **my_copy_array(char **old_array, int new_size)
 
 	return (new_array);
 }
-
