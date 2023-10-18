@@ -127,7 +127,7 @@ int my_list_length(char **list, const char *prefix)
 		}
 		length++;
 	}
-	else 
+	else
 	{
 		while (*list != NULL)
 		{
