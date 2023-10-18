@@ -1,4 +1,4 @@
-#include "shell.h"
+#include "shell.OAh"
 
 /**
  * my_setenv - Set an environment variable with a given name and value.
@@ -7,6 +7,8 @@
  *
  * Return: SKIP_FORK if successful, or an error code on failure.
  */
+int my_setenv(const char *variable_name, const char *variable_value);
+int status;
 int my_setenv(const char *variable_name, const char *variable_value)
 {
 	char **new_environment;
@@ -25,29 +27,29 @@ int my_setenv(const char *variable_name, const char *variable_value)
 	}
 
 	buffer = concat_strings((char *)variable_name, "=");
+
 	existing_variable = my_get_array_element(environ, buffer);
 
 	temp_buffer = concat_strings(buffer, (char *)variable_value);
 	free(buffer);
-	buffer = temp_buffer;
 
 	if (existing_variable == NULL)
 	{
 		length = my_list_length(environ, NULL);
-		new_environment = my_copy_array(environ, length + 1);
-		new_environment[length - 1] = buffer;
-		new_environment[length] = NULL;
+		new_environment = my_copy_array(environ, length + 2);
+		new_environment[length] = temp_buffer;
+		new_environment[length + 1] = NULL;
 		my_free_array(environ);
 		environ = new_environment;
-		return (SKIP_FORK);
+	}
+	else
+	{
+		length = my_list_length(environ, (char *)variable_name);
+		free(environ[length]);
+		environ[length] = temp_buffer;
 	}
 
-	length = my_list_length(environ, (char *)variable_name);
-	free(environ[length]);
-	environ[length] = buffer;
-
 	status = 0;
-
 	return (SKIP_FORK);
 }
 
@@ -70,11 +72,11 @@ int my_unsetenv(const char *variable_name)
 
 	if (index == -1)
 	{
-		bytes_written = write(STDERR_FILENO, "my_unsetenv: variable not found\n", 33);
-
+		bytes_written = write(STDERR_FILENO,
+				      "my_unsetenv: variable not found\n", 33);
 		(void)bytes_written;
 		status = 2;
-				      return (SKIP_FORK);
+		return (SKIP_FORK);
 	}
 
 	env_pointer = environ + index;
@@ -91,13 +93,13 @@ int my_unsetenv(const char *variable_name)
 
 	return (SKIP_FORK);
 }
-
 /**
  * my_change_directory - Change the current working directory.
  * @directory_name: The name of the directory to change to.
  *
  * Return: SKIP_FORK if successful, or an error code on failure.
  */
+int my_change_directory(char *directory_name);
 int my_change_directory(char *directory_name)
 {
 	char *home_directory;
@@ -106,11 +108,11 @@ int my_change_directory(char *directory_name)
 	char new_path_buffer[PATH_MAX];
 	size_t buffer_size = PATH_MAX;
 	int result;
-	ssize_t bytes_written;
 
 	if (getcwd(old_path_buffer, buffer_size) == NULL)
 	{
 		status = 2;
+		print_error_message("cd", directory_name);
 		return (SKIP_FORK);
 	}
 
@@ -128,12 +130,13 @@ int my_change_directory(char *directory_name)
 
 		result = chdir((const char *)home_directory);
 		if (result != -1)
+		{
 			setenv("PWD", (const char *)home_directory, 1);
+		}
 	}
 	else if (compare_strings("-", directory_name, MATCH) == TRUE)
 	{
-		previous_working_directory = my_get_array_element(environ,
-								  "OLDPWD=");
+		previous_working_directory = my_get_array_element(environ, "OLDPWD=");
 		if (previous_working_directory == NULL)
 		{
 			status = 2;
@@ -146,20 +149,16 @@ int my_change_directory(char *directory_name)
 		result = chdir((const char *)previous_working_directory);
 		if (result != -1)
 		{
-			bytes_written = write(STDOUT_FILENO,
-					      previous_working_directory,
-					      custom_strlen(previous_working_directory));
-			(void)bytes_written;
-			bytes_written = write(STDOUT_FILENO, "\n", 1);
-			setenv("PWD", (const char *)
-			       previous_working_directory, 1);
+			setenv("PWD", (const char *)previous_working_directory, 1);
 		}
 	}
 	else if (directory_name != NULL)
 	{
 		result = chdir((const char *)directory_name);
 		if (result != -1)
+		{
 			setenv("PWD", getcwd(new_path_buffer, buffer_size), 1);
+		}
 	}
 
 	if (result == -1)
@@ -169,17 +168,21 @@ int my_change_directory(char *directory_name)
 		return (SKIP_FORK);
 	}
 
-	status = 0;
 	setenv("OLDPWD", (const char *)old_path_buffer, 1);
+
+	status = 0;
 
 	return (SKIP_FORK);
 }
+
+
 /**
- * my_print_environment - Print the environment variables.
+ * my_alias_function - Handle alias functionality.
+ * @arguments: An array of arguments.
+ * @to_free: Flag indicating whether to free alias resources.
  *
  * Return: SKIP_FORK if successful, or an error code on failure.
  */
-
 int my_alias_function(char **arguments, int to_free)
 {
 	static Alias alias_head = {NULL, NULL, NULL};
@@ -228,6 +231,7 @@ int my_alias_function(char **arguments, int to_free)
 
 	if (no_error == 0)
 	{
+		status = 2;
 		return (SKIP_FORK);
 	}
 
@@ -235,27 +239,33 @@ int my_alias_function(char **arguments, int to_free)
 	return (SKIP_FORK);
 }
 
+/**
+ * my_print_environment - Print the environment variables.
+ *
+ * Return: SKIP_FORK if successful, or an error code on failure.
+ */
 int my_print_environment(void)
 {
-	char **env_pointer;
+	char **env_pointer = environ;
 	ssize_t bytes_written;
 	ssize_t newline_written;
 
-	env_pointer = environ;
 	while (*env_pointer != NULL)
 	{
-	    bytes_written = write(STDOUT_FILENO, *env_pointer,
-				  custom_strlen(*env_pointer));
-	    if (bytes_written == -1)
-	    {
-	    }
+		bytes_written = write(STDOUT_FILENO, *env_pointer,
+				      custom_strlen(*env_pointer));
+		if (bytes_written == -1)
+		{
+			perror("write");
+		}
 
-	    newline_written = write(STDOUT_FILENO, "\n", 1);
-	    if (newline_written == -1)
-	    {
-	    }
+		newline_written = write(STDOUT_FILENO, "\n", 1);
+		if (newline_written == -1)
+		{
+			perror("write");
+		}
 
-	    env_pointer++;
+		env_pointer++;
 	}
 
 	status = 0;
