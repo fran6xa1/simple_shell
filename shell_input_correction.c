@@ -7,13 +7,18 @@
  *
  * Return: The new, sanitized buffer.
  */
+char *sanitize_input(char *input_buffer, size_t *input_size);
+int line_num;
+char *shell_name;
 char *sanitize_input(char *input_buffer, size_t *input_size)
 {
 	size_t input_index = 0;
 	size_t sanitized_index = 0;
 	int is_space = 1;
-	char *sanitized_buffer = malloc(*input_size);
+	char current_char;
+	char *sanitized_buffer;
 
+	sanitized_buffer = (char *)malloc(*input_size);
 	if (sanitized_buffer == NULL)
 	{
 		return (NULL);
@@ -21,7 +26,7 @@ char *sanitize_input(char *input_buffer, size_t *input_size)
 
 	while (input_index < *input_size)
 	{
-		char current_char = input_buffer[input_index];
+		current_char = input_buffer[input_index];
 
 		if (current_char == ' ' || current_char == ';' ||
 			current_char == '|' || current_char == '&')
@@ -54,35 +59,43 @@ char *sanitize_input(char *input_buffer, size_t *input_size)
 }
 
 
+
 /**
  * has_unexpected_chars - Checks if the input contains unexpected characters.
  * @input: Input string to be checked.
  *
  * Return: 1 if no unexpected characters found, 0 otherwise.
+ * has_unexpected_chars - Check if an input string contains
+ * unexpected characters.
+ * @input: The input string to check.
+ *
+ * Return: 1 if unexpected characters are found, 0 if the input is clean.
  */
 int has_unexpected_chars(const char *input)
 {
 	const char *ptr = input;
-	const char *next_char;
 
 	while (*ptr != '\0')
 	{
 		if (*ptr == ';' || *ptr == '|' || *ptr == '&')
 		{
-			next_char = ptr + 1;
-			while (*next_char == *ptr)
+			ptr++;
+			while (*ptr == ';' || *ptr == '|' || *ptr == '&')
 			{
-				next_char++;
+				ptr++;
 			}
-			if (*next_char == ';' || *next_char == '|' ||
-					*next_char == '&' || *next_char == ' ')
+
+			if (*ptr == ' ' || *ptr == '\0')
 			{
-				return (0);
+				return (1);
 			}
 		}
-		ptr++;
+		else
+		{
+			ptr++;
+		}
 	}
-	return (1);
+	return (0);
 }
 
 
@@ -91,12 +104,14 @@ int has_unexpected_chars(const char *input)
  * @command: Command causing the error.
  * @argument: First argument to the command.
  */
+void print_error_message(const char *command, const char *argument);
 void print_error_message(const char *command, const char *argument)
 {
 	char *line_number_str;
 	ssize_t write_result;
 
 	line_number_str = convert_int_to_string(line_num);
+
 
 	write_result = write(STDERR_FILENO, shell_name, custom_strlen(shell_name));
 	if (write_result == -1)
@@ -124,7 +139,8 @@ void print_error_message(const char *command, const char *argument)
 	if (compare_strings("cd", command, MATCH) == TRUE)
 	{
 		status = 2;
-		write_result = write(STDERR_FILENO, ": cd: can't cd to ", 18);
+		write_result = write(STDERR_FILENO,
+				": cd: Unable to change directory to '", 36);
 		if (write_result == -1)
 		{
 			perror("write");
@@ -139,10 +155,10 @@ void print_error_message(const char *command, const char *argument)
 			exit(EXIT_FAILURE);
 		}
 
-		write_result = write(STDERR_FILENO, "\n", 1);
+		write_result = write(STDERR_FILENO, "'\n", 2);
 		if (write_result == -1)
 		{
-		perror("write");
+			perror("write");
 			exit(EXIT_FAILURE);
 		}
 		return;
@@ -150,7 +166,7 @@ void print_error_message(const char *command, const char *argument)
 
 	if (compare_strings("exit", command, MATCH) == TRUE)
 	{
-		write_result = write(STDERR_FILENO, ": exit: Illegal number: ", 24);
+		write_result = write(STDERR_FILENO, ": exit: Invalid number '", 23);
 		if (write_result == -1)
 		{
 			perror("write");
@@ -165,7 +181,7 @@ void print_error_message(const char *command, const char *argument)
 			exit(EXIT_FAILURE);
 		}
 
-		write_result = write(STDERR_FILENO, "\n", 1);
+		write_result = write(STDERR_FILENO, "'\n", 2);
 		if (write_result == -1)
 		{
 			perror("write");
@@ -177,7 +193,7 @@ void print_error_message(const char *command, const char *argument)
 	if (*command == ';' || *command == '|' || *command == '&')
 	{
 		status = 2;
-		write_result = write(STDERR_FILENO, ": Syntax error: \"", 17);
+		write_result = write(STDERR_FILENO, ": Syntax error: Unexpected '", 29);
 		if (write_result == -1)
 		{
 			perror("write");
@@ -192,14 +208,16 @@ void print_error_message(const char *command, const char *argument)
 		}
 
 		if (*command == *(command + 1))
-			write_result = write(STDERR_FILENO, command, 1);
-		if (write_result == -1)
 		{
-			perror("write");
-			exit(EXIT_FAILURE);
+			write_result = write(STDERR_FILENO, command, 1);
+			if (write_result == -1)
+			{
+				perror("write");
+				exit(EXIT_FAILURE);
+			}
 		}
 
-		write_result = write(STDERR_FILENO, "\" unexpected\n", 14);
+		write_result = write(STDERR_FILENO, "'\n", 2);
 		if (write_result == -1)
 		{
 			perror("write");
@@ -209,7 +227,7 @@ void print_error_message(const char *command, const char *argument)
 	}
 
 	status = 127;
-	write_result = write(STDERR_FILENO, ": ", 2);
+	write_result = write(STDERR_FILENO, ": '", 3);
 	if (write_result == -1)
 	{
 		perror("write");
@@ -223,14 +241,13 @@ void print_error_message(const char *command, const char *argument)
 		exit(EXIT_FAILURE);
 	}
 
-	write_result = write(STDERR_FILENO, ": not found\n", 12);
+	write_result = write(STDERR_FILENO, "' command not found\n", 19);
 	if (write_result == -1)
 	{
 		perror("write");
 		exit(EXIT_FAILURE);
 	}
 }
-
 
 /**
  * evaluate_variables - Evaluates variables in the given argument.
@@ -263,6 +280,7 @@ char *evaluate_variables(const char *argument)
 			}
 			var_length = ptr - start;
 			var_name = malloc(var_length + 1);
+
 			if (var_name == NULL)
 			{
 				perror("malloc");
@@ -303,4 +321,6 @@ char *evaluate_variables(const char *argument)
 
 	return (evaluated_argument);
 }
+
+
 
