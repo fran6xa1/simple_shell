@@ -1,155 +1,120 @@
-#include "shell.h"
+A#include "shell.h"
 
 /**
- *  custom_strlen - returns length of a string
- * @str: string to be evaluated
+ * CompareStrings - Compares two strings.
+ * @str1: String to be compared with str2.
+ * @str2: String to be compared with str1.
  *
- * Return: the length of the string
+ * Return: 0 if strings are equal, positive value if str1 > str2,
+ * negative value if str1 < str2.
  */
-	size_t custom_strlen(const char *str)
+int CompareStrings(char *str1, char *str2)
 {
-	size_t length;
-
-	if (str == NULL)
+	while (*str1 && (*str1 == *str2))
 	{
-		return (0);
+		str1++;
+		str2++;
 	}
 
-	length = 0;
+	return (*(unsigned char *)str1 - *(unsigned char *)str2);
+}
+/**
+ * StringLength - Returns the length of a string.
+ * @str: String passed.
+ *
+ * Return: Length of the string passed.
+ */
+int StringLength(char *str)
+{
+	int length = 0;
 
-	while (str[length] != '\0')
+	while (*str != '\0')
 	{
 		length++;
+		str++;
 	}
 
 	return (length);
 }
 
-
 /**
- * custom_strdup - allocates a space in memory for a copy of a string
- * @src: string a copy is made of
+ * CompareStringsN - Compares two strings up to n bytes.
+ * @str1: String to be compared with str2.
+ * @str2: String to be compared with str1.
+ * @n: Number of bytes to compare.
  *
- * Return: a pointer to the copy, or NULL if failure
+ * Return: 0 if strings are equal up to n bytes, positive value if str1 > str2,
+ * negative value if str1 < str2.
  */
-	char *custom_strdup(const char *src)
-{
-	size_t len;
-	size_t i;
-	char *dest;
-
-	if (src == NULL)
-	{
-		return (NULL);
-	}
-
-	len = custom_strlen(src);
-	dest = (char *)malloc(len + 1);
-
-	if (dest == NULL)
-	{
-		return (NULL);
-	}
-
-	for (i = 0; i <= len; i++)
-	{
-		dest[i] = src[i];
-	}
-
-	return (dest);
-}
-
-/**
- * concat_strings - concatenates two strings
- * @str1: first string
- * @str2: second string
- *
- * Return: a pointer to the new string, or NULL if failure
- */
-char *concat_strings(const char *str1, const char *str2);
-char *concat_strings(const char *str1, const char *str2)
-{
-	size_t len1;
-	size_t len2;
-	size_t total_len;
-	char *result;
-	char *dest;
-
-	if (str1 == NULL && str2 == NULL)
-	{
-		return (NULL);
-	}
-
-	len1 = (str1 != NULL) ? custom_strlen(str1) : 0;
-	len2 = (str2 != NULL) ? custom_strlen(str2) : 0;
-	total_len = len1 + len2;
-
-	result = (char *)malloc(total_len + 1);
-	if (result == NULL)
-	{
-		return (NULL);
-	}
-
-	dest = result;
-
-	if (str1 != NULL)
-	{
-		while (*str1 != '\0')
-		{
-			*dest = *str1;
-			dest++;
-			str1++;
-		}
-	}
-
-	if (str2 != NULL)
-	{
-		while (*str2 != '\0')
-		{
-			*dest = *str2;
-			dest++;
-			str2++;
-		}
-	}
-
-	*dest = '\0';
-
-	return (result);
-}
-
-/**
- * compare_strings - compare two string
- * @string1: string to be compared
- * @string2: string to be compared
- * @match_mode: if string needs to be matched exactly or if just a prefix
- * needs to be matched
- *
- * Return: difference between strings
- */
-	int compare_strings(const char *string1, const char *string2, int match_mode)
+int CompareStringsN(char *str1, char *str2, int n)
 {
 	int i;
 
-	if (string1 == NULL || string2 == NULL)
-		return (0);
-
-	if (match_mode == 0)
+	for (i = 0; str1[i] && str2[i] && i < n; i++)
 	{
-		return (0);
+		if (str1[i] != str2[i])
+			return (str1[i] - str2[i]);
 	}
-
-	i = 0;
-
-	while (string1[i] != '\0' && string2[i] != '\0')
-	{
-		if (string1[i] != string2[i])
-			return (0);
-
-		i++;
-	}
-
-	if (match_mode == 1 || (string1[i] == '\0' && string2[i] == '\0'))
-		return (1);
 
 	return (0);
+}
+
+/**
+ * DuplicateString - Duplicates a string.
+ * @source: String to be duplicated.
+ *
+ * Return: Pointer to the newly allocated duplicated string.
+ * NULL if memory allocation fails or input string is NULL.
+ */
+char *DuplicateString(char *source)
+{
+	int length;
+	char *duplicate;
+	int i;
+
+	if (source == NULL)
+		return (NULL);
+
+	length = 0;
+	while (source[length] != '\0')
+	{
+		length++;
+	}
+
+	duplicate = (char *)malloc(sizeof(char) * (length + 1));
+
+	if (duplicate == NULL)
+	{
+		return (NULL); /* Memory allocation failed */
+	}
+
+	for (i = 0; i <= length; i++)
+	{
+		duplicate[i] = source[i];
+	}
+
+	return (duplicate);
+}
+
+/**
+ * FindCharacter - Locates a character in a string.
+ * @str: String to be checked.
+ * @ch: Character to be located.
+ *
+ * Return: Returns a pointer to the first occurrence of the character
+ * or NULL if the character is not found.
+ */
+char *FindCharacter(char *str, char ch)
+{
+	while (*str != '\0')
+	{
+		if (*str == ch)
+			return (str);
+		str++;
+	}
+
+	if (ch == '\0')
+		return (str);
+
+	return (NULL);
 }

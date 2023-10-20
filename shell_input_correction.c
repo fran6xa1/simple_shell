@@ -1,325 +1,157 @@
 #include "shell.h"
 
 /**
- * sanitize_input - Sanitizes input from the command line.
- * @input_buffer: Buffer to be sanitized.
- * @input_size: Size of input buffer.
- *
- * Return: The new, sanitized buffer.
- */
-char *sanitize_input(char *input_buffer, size_t *input_size);
-int line_num;
-char *shell_name;
-char *sanitize_input(char *input_buffer, size_t *input_size)
+* concatPaths - concatenates path and command
+* @base: base path of the command
+* @cmd: user entered command
+*
+* Return: buffer containing concatenated path and command on success
+* NULL on failure
+*/
+char *concatPaths(char *base, char *cmd)
 {
-	size_t input_index = 0;
-	size_t sanitized_index = 0;
-	int is_space = 1;
-	char current_char;
-	char *sanitized_buffer;
+	char *res;
+	size_t baseLen = 0, cmdLen = 0;
+	size_t i;
+	size_t j;
 
-	sanitized_buffer = (char *)malloc(*input_size);
-	if (sanitized_buffer == NULL)
-	{
+	if (cmd == NULL)
+		cmd = "";
+
+	if (base == NULL)
+		base = "";
+
+  /* Calculates the length of base path and user command */
+	while (base[baseLen] != '\0')
+		baseLen++;
+
+	while (cmd[cmdLen] != '\0')
+		cmdLen++;
+
+	/* Allocate memory for the result buffer */
+	res = malloc(sizeof(char) * (baseLen + cmdLen + 2));
+	if (res == NULL)
 		return (NULL);
-	}
 
-	while (input_index < *input_size)
+	/* Copy base path to the result buffer */
+	for (i = 0; i < baseLen; i++)
+		res[i] = base[i];
+
+	/* If base path doesn't end with '/', add '/' */
+	if (baseLen > 0 && base[baseLen - 1] != '/')
 	{
-		current_char = input_buffer[input_index];
-
-		if (current_char == ' ' || current_char == ';' ||
-			current_char == '|' || current_char == '&')
-		{
-			if (!is_space)
-			{
-				sanitized_buffer[sanitized_index] = ' ';
-				sanitized_index++;
-				is_space = 1;
-			}
-
-			sanitized_buffer[sanitized_index] = current_char;
-			sanitized_index++;
-			input_index++;
-		}
-		else
-		{
-			sanitized_buffer[sanitized_index] = current_char;
-			sanitized_index++;
-			input_index++;
-			is_space = 0;
-		}
+		res[baseLen] = '/';
+		baseLen++;
 	}
 
-	sanitized_buffer[sanitized_index] = '\0';
-	*input_size = sanitized_index + 1;
-
-	free(input_buffer);
-	return (sanitized_buffer);
+	/* Copy user command to the result buffer */
+	for (j = 0; j < cmdLen; j++)
+		res[baseLen + j] = cmd[j];
+	/* Null-terminate the result buffer */
+	res[baseLen + cmdLen] = '\0';
+	return (res);
 }
 
+/**
+ * Custom strcpy - Copies a string from source to destination.
+ * @dest: Destination string.
+ * @src: Source string.
+ * Return: Pointer to the destination string.
+ */
+char *StringCopy(char *dest, const char *src)
+{
+	char *start = dest;
 
+	while (*src != '\0')
+	{
+		*dest = *src;
+		dest++;
+		src++;
+	}
+	*dest = '\0';
+	return (start);
+}
 
 /**
- * has_unexpected_chars - Checks if the input contains unexpected characters.
- * @input: Input string to be checked.
- *
- * Return: 1 if no unexpected characters found, 0 otherwise.
- * has_unexpected_chars - Check if an input string contains
- * unexpected characters.
- * @input: The input string to check.
- *
+ * evaluateCommand - determines whether it's a built-in or external command
+ * @arguments: tokenized user input
+ * @inputLine: line obtained from getline function
+ * Return: 1 if the command is executed, 0 if not
  */
-int has_unexpected_chars(const char *input)
+int evaluateCommand(char **arguments, char *inputLine)
 {
-	const char *ptr = input;
-
-	while (*ptr != '\0')
+	if (CheckBuiltin(arguments, inputLine))
 	{
-		if (*ptr == ';' || *ptr == '|' || *ptr == '&')
-		{
-			ptr++;
-			while (*ptr == ';' || *ptr == '|' || *ptr == '&')
-			{
-				ptr++;
-			}
-
-			if (*ptr == ' ' || *ptr == '\0')
-			{
-				return (1);
-			}
-		}
-		else
-		{
-			ptr++;
-		}
+		return (1);
+	}
+	else if (**arguments == '/')
+	{
+		executeCommand(arguments[0], arguments);
+		return (1);
 	}
 	return (0);
 }
 
-
 /**
- * print_error_message - Prints error messages and sets status.
- * @command: Command causing the error.
- * @argument: First argument to the command.
+ * GetPath - Finds the PATH from the global environment variables.
+ * Return: NULL if PATH is not found, or PATH if found.
  */
-void print_error_message(const char *command, const char *argument);
-void print_error_message(const char *command, const char *argument)
+char *GetPath(void)
 {
-	char *line_number_str;
-	ssize_t write_result;
+	char **envVar = environ;
+	char *path = NULL;
 
-	line_number_str = convert_int_to_string(line_num);
-
-
-	write_result = write(STDERR_FILENO, shell_name, custom_strlen(shell_name));
-	if (write_result == -1)
+	while (*envVar != NULL)
 	{
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
-
-	write_result = write(STDERR_FILENO, ": ", 2);
-	if (write_result == -1)
-	{
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
-
-	write_result = write(STDERR_FILENO, line_number_str,
-			custom_strlen(line_number_str));
-	free(line_number_str);
-	if (write_result == -1)
-	{
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
-
-	if (compare_strings("cd", command, MATCH) == TRUE)
-	{
-		status = 2;
-		write_result = write(STDERR_FILENO,
-				": cd: Unable to change directory to '", 36);
-		if (write_result == -1)
+		if (CompareStringsN(*envVar, "PATH=", 5) == 0)
 		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-
-		write_result = write(STDERR_FILENO, argument,
-				custom_strlen((char *)argument));
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-
-		write_result = write(STDERR_FILENO, "'\n", 2);
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-		return;
-	}
-
-	if (compare_strings("exit", command, MATCH) == TRUE)
-	{
-		write_result = write(STDERR_FILENO, ": exit: Invalid number '", 23);
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-
-		write_result = write(STDERR_FILENO,
-				argument, custom_strlen((char *)argument));
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-
-		write_result = write(STDERR_FILENO, "'\n", 2);
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-		return;
-	}
-
-	if (*command == ';' || *command == '|' || *command == '&')
-	{
-		status = 2;
-		write_result = write(STDERR_FILENO, ": Syntax error: Unexpected '", 29);
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-
-		write_result = write(STDERR_FILENO, command, 1);
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-
-		if (*command == *(command + 1))
-		{
-			write_result = write(STDERR_FILENO, command, 1);
-			if (write_result == -1)
+			path = malloc(StringLength(*envVar) - 4);
+			if (path == NULL)
 			{
-				perror("write");
+				perror("Memory allocation error");
 				exit(EXIT_FAILURE);
 			}
+
+			StringCopy(path, *envVar + 5);
+			return (path);
 		}
-
-		write_result = write(STDERR_FILENO, "'\n", 2);
-		if (write_result == -1)
-		{
-			perror("write");
-			exit(EXIT_FAILURE);
-		}
-		return;
+		envVar++;
 	}
 
-	status = 127;
-	write_result = write(STDERR_FILENO, ": '", 3);
-	if (write_result == -1)
-	{
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
-
-	write_result = write(STDERR_FILENO, command, custom_strlen((char *)command));
-	if (write_result == -1)
-	{
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
-
-	write_result = write(STDERR_FILENO, "' command not found\n", 19);
-	if (write_result == -1)
-	{
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
+	return (NULL);
 }
-
 /**
- * evaluate_variables - Evaluates variables in the given argument.
- * @argument: Argument to be checked and evaluated.
+ * ValidatePath - Checks whether path is valid and contains the command.
+ * @directories: Tokenized directories in the PATH.
+ * @command: User entered command.
  *
- * Return: A pointer to the evaluated argument.
+ * Return: Full path to the command if found, NULL on failure.
  */
-char *evaluate_variables(const char *argument)
+char *ValidatePath(char **directories, char *command)
 {
-	char *evaluated_argument = strdup(argument);
-	char *ptr = evaluated_argument;
-	char *start = NULL;
-	size_t var_length = 0;
-	char *var_name;
-	char *replacement;
-	size_t prefix_length;
-	size_t suffix_length;
-	char *prefix;
-	char *suffix;
-	const char *env_value;
+	int index = 0;
+	char *fullPath = NULL;
 
-	while (*ptr != '\0')
+	while (directories[index] != NULL)
 	{
-		if (*ptr == '$')
+		size_t len = snprintf(NULL, 0, "%s/%s", directories[index], command) + 1;
+
+		fullPath = malloc(len);
+		if (fullPath == NULL)
 		{
-			start = ptr + 1;
-			while (*ptr != '\0' && *ptr != ' ' && *ptr != '\t')
-			{
-				ptr++;
-			}
-			var_length = ptr - start;
-			var_name = malloc(var_length + 1);
-
-			if (var_name == NULL)
-			{
-				perror("malloc");
-				exit(EXIT_FAILURE);
-			}
-			strncpy(var_name, start, var_length);
-			var_name[var_length] = '\0';
-
-			env_value = getenv(var_name);
-			free(var_name);
-
-			if (env_value != NULL)
-			{
-				replacement = strdup(env_value);
-				prefix_length = start - evaluated_argument - 1;
-				suffix_length = custom_strlen(ptr);
-				prefix = strndup(evaluated_argument, prefix_length);
-				suffix = strdup(ptr);
-				free(evaluated_argument);
-				evaluated_argument = malloc(prefix_length
-						+ custom_strlen(replacement) + suffix_length + 1);
-				if (evaluated_argument == NULL)
-				{
-					perror("malloc");
-					exit(EXIT_FAILURE);
-				}
-				snprintf(evaluated_argument, prefix_length + 1, "%s", prefix);
-				strcat(evaluated_argument, replacement);
-				strcat(evaluated_argument, suffix);
-				free(prefix);
-				free(suffix);
-				free(replacement);
-				ptr = evaluated_argument + prefix_length;
-			}
+			perror("Memory allocation error");
+			exit(EXIT_FAILURE);
 		}
-		ptr++;
+		snprintf(fullPath, len, "%s/%s", directories[index], command);
+
+		if (access(fullPath, F_OK | X_OK) == 0)
+		{
+			return (fullPath);
+		}
+
+		free(fullPath);
+		index++;
 	}
 
-	return (evaluated_argument);
+	return (NULL);
 }
-
-
-

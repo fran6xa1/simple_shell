@@ -1,109 +1,70 @@
 #include "shell.h"
 
 /**
- * int_to_string - Converts an integer into a string.
- * @number: Integer to be converted.
+ * TokenizeInput - Creates tokens from given input.
+ * @input: Input to be tokenized.
  *
- * Return: The converted string.
+ * Return: Array of strings representing tokens.
  */
-char *int_to_string(int number)
+char **TokenizeInput(char *input);
+char **TokenizeInput(char *input)
 {
-	char *str;
-	int size = snprintf(NULL, 0, "%d", number);
+	char *token = NULL, *delim = " \t\r\n";
+	char **tokens = NULL;
+	int tokensize = 1;
+	size_t index = 0;
+	int flag = 0;
+	char *inputCopy = DuplicateString(input);
+	size_t inputLength;
+	size_t i;
 
-	if (size < 0)
+	if (inputCopy == NULL)
 	{
-		perror("snprintf");
+		perror("Memory allocation error");
 		exit(EXIT_FAILURE);
 	}
 
-	str = malloc(size + 1);
-	if (str == NULL)
+	inputLength = StringLength(inputCopy);
+
+	for (i = 0; i < inputLength; i++)
 	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
-
-	snprintf(str, size + 1, "%d", number);
-	return (str);
-}
-
-/**
- * string_to_int - Converts a string into an integer.
- * @s: String to be converted.
- *
- * Return: The converted integer.
- */
-int string_to_int(const char *s)
-{
-	int result = 0;
-	int sign = 1;
-
-	if (*s == '-')
-	{
-		sign = -1;
-		s++;
-	}
-
-	while (*s != '\0')
-	{
-		if (isdigit(*s))
+		if (CompareStringsN(delim, inputCopy + i, 1) == 0 && flag == 0)
 		{
-			result = (result * 10) + (*s - '0');
+			tokensize++;
+			flag = 1;
 		}
-		else
+		else if (CompareStringsN(delim, inputCopy + i, 1) != 0 && flag == 1)
 		{
-			return (-1);
+			flag = 0;
 		}
-		s++;
 	}
 
-	return (result * sign);
-}
+	free(inputCopy);
 
-/**
- * my_free_array - Free an array of strings and its memory.
- * @array: The array of strings to free.
- *
- * Return: TRUE if successful.
- */
-int my_free_array(char **array)
-{
-	int i;
+	tokens = (char **)malloc(sizeof(char *) * (tokensize + 1));
 
-	if (array == NULL)
+	if (tokens == NULL)
 	{
-		return (FALSE);
-	}
-
-	for (i = 0; array[i] != NULL; i++)
-	{
-		free(array[i]);
-	}
-
-	free(array);
-
-	return (TRUE);
-}
-
-/**
- * convert_int_to_string - Converts an integer to a string.
- * @num: Integer to be converted.
- *
- * Return: The converted string.
- */
-char *convert_int_to_string(int num)
-{
-	char *str;
-	int length = snprintf(NULL, 0, "%d", num);
-
-	str = malloc(length + 1);
-
-	if (str == NULL)
-	{
-		perror("malloc");
+		perror("Memory allocation error");
 		exit(EXIT_FAILURE);
 	}
-	snprintf(str, length + 1, "%d", num);
-	return (str);
+
+	token = strtok(input, delim);
+
+	while (token != NULL)
+	{
+		tokens[index] = DuplicateString(token);
+
+		if (tokens[index] == NULL)
+		{
+			perror("Memory allocation error");
+			exit(EXIT_FAILURE);
+		}
+
+		token = strtok(NULL, delim);
+		index++;
+	}
+
+	tokens[index] = NULL;
+	return (tokens);
 }
