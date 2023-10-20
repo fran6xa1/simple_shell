@@ -80,8 +80,10 @@ char *StringCopy(char *dest, const char *src)
  *
  * Return: 1 on success, 0 on failure.
  */
-int evaluateCommand(char **arguments, char *inputLine, struct AliasList *aliasList);
-int evaluateCommand(char **arguments, char *inputLine, struct AliasList *aliasList)
+int evaluateCommand(char **arguments, char *inputLine,
+		struct AliasList *aliasList);
+int evaluateCommand(char **arguments, char *inputLine,
+		struct AliasList *aliasList)
 {
 	int i;
 	int success = 1; /* Assume success initially*/
