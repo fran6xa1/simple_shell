@@ -59,5 +59,11 @@ extern struct builtin
 	char *exit;
 } builtin;
 
+char *findAlias(const struct AliasList *aliasList, const char *name);
+
+void addAlias(struct AliasList *aliasList, const char *name, const char *value);
+
+void printAliases(const struct AliasList *aliasList);
+
 #endif
 B
