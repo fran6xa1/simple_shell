@@ -1,4 +1,4 @@
-A#include "shell.h"
+#include "shell.h"
 
 /**
  * CompareStrings - Compares two strings.

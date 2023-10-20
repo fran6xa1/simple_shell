@@ -11,10 +11,10 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <stdbool.h>
+#include <signal.h>
 
 /* environment variables */
 extern char **environ;
-extern __sighandler_t signal(int __sig, __sighandler_t __handler);
 
 /* handle built ins */
 int evaluateCommand(char **arguments, char *inputLine);
