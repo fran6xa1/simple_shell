@@ -79,6 +79,7 @@ void FreeBuffers(char **arr)
  *
  * This function handles signals and maintains interactive mode.
  */
+void HandleSignal(int sigNum);
 void HandleSignal(int sigNum)
 {
 	(void)sigNum; /* Unused parameter */
@@ -90,7 +91,7 @@ void HandleSignal(int sigNum)
 	}
 }
 
-struct flags
+struct flag
 {
 	bool interactive;
 } flag;
@@ -100,6 +101,7 @@ struct flags
  * This function checks if the shell is in interactive mode and prints
  * the shell prompt accordingly.
  */
+void DisplayPrompt(void);
 void DisplayPrompt(void)
 {
 	if ((isatty(STDIN_FILENO) == 1) && (isatty(STDOUT_FILENO) == 1))

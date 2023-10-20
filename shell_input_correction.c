@@ -73,23 +73,78 @@ char *StringCopy(char *dest, const char *src)
 }
 
 /**
- * evaluateCommand - determines whether it's a built-in or external command
- * @arguments: tokenized user input
- * @inputLine: line obtained from getline function
- * Return: 1 if the command is executed, 0 if not
+ * evaluateCommand - Evaluate and execute shell commands.
+ * @arguments: Tokenized command arguments.
+ * @inputLine: Input line read from stdin.
+ * @aliasList: Pointer to the list of aliases.
+ *
+ * Return: 1 on success, 0 on failure.
  */
-int evaluateCommand(char **arguments, char *inputLine)
+int evaluateCommand(char **arguments, char *inputLine, struct AliasList *aliasList);
+int evaluateCommand(char **arguments, char *inputLine, struct AliasList *aliasList)
 {
+	int i;
+	int success = 1; /* Assume success initially*/
+
 	if (CheckBuiltin(arguments, inputLine))
 	{
-		return (1);
+		return (1); /* Builtin command executed successfully*/
 	}
-	else if (**arguments == '/')
+
+/* Loop through the arguments and execute commands based on operators */
+	for (i = 0; arguments[i] != NULL; i++)
 	{
-		executeCommand(arguments[0], arguments);
-		return (1);
+		/* If command is "&&" */
+		if (CompareStrings(arguments[i], "&&") == 0)
+		{
+			/* If the previous command was successful, execute the next command */
+			if (success)
+			{
+				success = executeCommand(arguments[i + 1], &arguments[i + 1]);
+			}
+			else
+			{
+				/* If previous command failed, skip the next command*/
+				i++; /* Skip the next command after "&&"*/
+			}
+		}
+/* If command is "||" */
+		else if (CompareStrings(arguments[i], "||") == 0)
+		{
+			/* If the previous command failed, execute the next command */
+			if (!success)
+			{
+				success = executeCommand(arguments[i + 1], &arguments[i + 1]);
+			}
+			else
+			{
+				/* If previous command was successful, skip the next command*/
+				i++; /* Skip the next command after "||" */
+			}
+		}
+/* Handle 'alias' command */
+		else if (CompareStrings(arguments[i], "alias") == 0)
+		{
+
+		}
+/* Regular command, execute it*/
+		else
+		{
+			/* Handle variables replacement here if needed */
+			char *aliasValue = findAlias(aliasList, arguments[i]);
+
+			if (aliasValue != NULL)
+			{
+				success = executeCommand(aliasValue, &arguments[i]);
+			}
+			else
+			{
+				success = executeCommand(arguments[i], &arguments[i]);
+			}
+		}
 	}
-	return (0);
+
+	return (success); /* Return 1 if all commands were successful, 0 otherwise*/
 }
 
 /**

@@ -16,7 +16,17 @@
 /* environment variables */
 extern char **environ;
 
-/* handle built ins */
+extern struct AliasList
+{
+    struct Alias *head;
+} aliasList;
+
+extern struct Alias
+{
+    char *name;
+    char *value;
+    struct Alias *next;
+} Alias;
 int evaluateCommand(char **arguments, char *inputLine);
 void DisplayPrompt(void);
 void HandleSignal(int sigNum);
@@ -50,3 +60,4 @@ extern struct builtin
 } builtin;
 
 #endif
+B

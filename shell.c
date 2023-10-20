@@ -25,6 +25,7 @@ int main(int ac, char **av, char *envp[])
 	size_t bufsize = 0;
 	ssize_t linesize = 0;
 	char **command = NULL, **paths = NULL;
+	struct AliasList *aliasList = NULL;
 	(void)envp, (void)av;
 	if (ac < 1)
 		return (-1);
@@ -44,8 +45,12 @@ int main(int ac, char **av, char *envp[])
 		command = TokenizeInput(line);
 		if (command == NULL || *command == NULL || **command == '\0')
 			continue;
-		if (evaluateCommand(command, line))
+
+		if (evaluateCommand(command, line, aliasList))
+		{
 			continue;
+		}
+
 		path = GetPath();
 		paths = TokenizeInput(path);
 		pathcommand = ValidatePath(paths, command[0]);
@@ -54,12 +59,6 @@ int main(int ac, char **av, char *envp[])
 		else
 			executeCommand(pathcommand, command);
 	}
-	if (linesize < 0 && flags.interactive)
-	{
-		if (write(STDERR_FILENO, "\n", 1) == -1)
-		{
-		}
-	}
-	free(line);
+
 	return (0);
 }
