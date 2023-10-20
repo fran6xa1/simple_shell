@@ -26,3 +26,27 @@ char *concatPaths(char *base, char *cmd);
 int CheckBuiltin(char **cmd, char *inputLine);
 void HandleExit(char **cmd, char *input);
 
+void DisplayEnvironment(void);
+
+/* string handlers */
+char *StringCopy(char *dest, const char *src);
+int CompareStrings(char *str1, char *str2);
+int StringLength(char *str);
+int CompareStringsN(char *str1, char *str2, int n);
+char *DuplicateString(char *source);
+char *FindCharacter(char *str, char ch);
+
+int executeCommand(char *command, char **args);
+char *GetPath(void);
+
+/* helper function for efficient free */
+void FreeBuffers(char **arr);
+
+
+extern struct builtin
+{
+	char *env;
+	char *exit;
+} builtin;
+
+#endif
