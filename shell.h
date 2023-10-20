@@ -27,7 +27,7 @@ extern struct Alias
     char *value;
     struct Alias *next;
 } Alias;
-int evaluateCommand(char **arguments, char *inputLine);
+int evaluateCommand(char **arguments, char *inputLine, struct AliasList *aliasList);
 void DisplayPrompt(void);
 void HandleSignal(int sigNum);
 char **TokenizeInput(char *input);
@@ -66,4 +66,4 @@ void addAlias(struct AliasList *aliasList, const char *name, const char *value);
 void printAliases(const struct AliasList *aliasList);
 
 #endif
-B
+
