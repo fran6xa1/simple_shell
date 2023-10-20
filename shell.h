@@ -23,10 +23,10 @@
 #define DO_EXECVE 7
 
 /**
- * struct Alias - singly linked list
- * @name: name of alias
- * @value: command that alias calls
- * @next: points to next node
+ * struct Alias - A structure to represent an alias in a shell
+ * @alias_name: The name of the alias
+ * @alias_value: The value associated with the alias
+ * @next_alias: A pointer to the next alias in the list
  */
 typedef struct Alias
 {
@@ -101,7 +101,8 @@ int print_alias_list(Alias *alias_list);
 
 int print_alias_value(char *argument, Alias *alias_list);
 
-int update_alias_value(Alias *alias_list, const char *alias_name, const char *new_alias_value);
+int update_alias_value(Alias *alias_list, const char *alias_name,
+		const char *new_alias_value);
 
 char *convert_int_to_string(int num);
 
