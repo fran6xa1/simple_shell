@@ -58,6 +58,7 @@ char *concatPaths(char *base, char *cmd)
  * @src: Source string.
  * Return: Pointer to the destination string.
  */
+char *StringCopy(char *dest, const char *src);
 char *StringCopy(char *dest, const char *src)
 {
 	char *start = dest;
@@ -184,6 +185,7 @@ char *GetPath(void)
  *
  * Return: Full path to the command if found, NULL on failure.
  */
+char *ValidatePath(char **directories, char *command);
 char *ValidatePath(char **directories, char *command)
 {
 	int index = 0;
