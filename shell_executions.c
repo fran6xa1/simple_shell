@@ -15,23 +15,31 @@ int executeCommand(char *command, char **args)
 	child_pid = fork();
 	if (child_pid < 0)
 	{
-	perror(command);
-	return (-1); /* Return an error code */
+		perror(command);
+		return (0); /* Return 0 to indicate failure*/
 	}
 	if (child_pid == 0)
 	{
-	if (execve(command, args, environment) == -1)
-	{
-	perror(command);
-	free(command);
-	FreeBuffers(args);
-	exit(98);
-	}
+		if (execve(command, args, environment) == -1)
+		{
+			perror(command);
+			free(command);
+			FreeBuffers(args);
+			exit(98);
+		}
 	}
 	else
 	{
-	wait(&status);
+		wait(&status);
+		if (WIFEXITED(status))
+		{
+			return (WEXITSTATUS(status)) == 0;
+/* Return 1 if child process exited successfully, 0 otherwise */
+		}
+		else
+		{
+			return (0); /* Return 0 if child process didn't exit normally */
+		}
 	}
-	return (0); /* Return success */
+	return (1); /* Return 1 to indicate success */
 }
-
