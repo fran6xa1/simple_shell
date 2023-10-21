@@ -25,7 +25,6 @@ int main(int ac, char **av, char *envp[])
 	size_t bufsize = 0;
 	ssize_t linesize = 0;
 	char **command = NULL, **paths = NULL;
-	struct AliasList *aliasList = NULL;
 	(void)envp, (void)av;
 	if (ac < 1)
 		return (-1);
@@ -46,7 +45,7 @@ int main(int ac, char **av, char *envp[])
 		if (command == NULL || *command == NULL || **command == '\0')
 			continue;
 
-		if (evaluateCommand(command, line, aliasList))
+		if (evaluateCommand(command, line))
 		{
 			continue;
 		}
