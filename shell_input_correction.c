@@ -58,6 +58,7 @@ char *concatPaths(char *base, char *cmd)
  * @src: Source string.
  * Return: Pointer to the destination string.
  */
+char *StringCopy(char *dest, const char *src);
 char *StringCopy(char *dest, const char *src)
 {
 	char *start = dest;
@@ -78,7 +79,14 @@ char *StringCopy(char *dest, const char *src)
  * @inputLine: line obtained from getline function
  * Return: 1 if the command is executed, 0 if not
  */
+<<<<<<< HEAD
 int evaluateCommand(char **arguments, char *inputLine)
+=======
+int evaluateCommand(char **arguments, char *inputLine,
+		struct AliasList *aliasList);
+int evaluateCommand(char **arguments, char *inputLine,
+		struct AliasList *aliasList)
+>>>>>>> 7b642c542c2203b26f59ddb632fa9708ce6fbefe
 {
 	if (CheckBuiltin(arguments, inputLine))
 	{
@@ -127,6 +135,7 @@ char *GetPath(void)
  *
  * Return: Full path to the command if found, NULL on failure.
  */
+char *ValidatePath(char **directories, char *command);
 char *ValidatePath(char **directories, char *command)
 {
 	int index = 0;

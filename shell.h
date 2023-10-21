@@ -16,7 +16,23 @@
 /* environment variables */
 extern char **environ;
 
+<<<<<<< HEAD
 int evaluateCommand(char **arguments, char *inputLine);
+=======
+extern struct AliasList
+{
+	struct Alias *head;
+} aliasList;
+
+extern struct Alias
+{
+	char *name;
+	char *value;
+	struct Alias *next;
+} Alias;
+int evaluateCommand(char **arguments, char *inputLine,
+		struct AliasList *aliasList);
+>>>>>>> 7b642c542c2203b26f59ddb632fa9708ce6fbefe
 void DisplayPrompt(void);
 void HandleSignal(int sigNum);
 char **TokenizeInput(char *input);
@@ -48,4 +64,14 @@ extern struct builtin
 	char *exit;
 } builtin;
 
+<<<<<<< HEAD
+=======
+char *findAlias(const struct AliasList *aliasList, const char *name);
+
+void addAlias(struct AliasList *aliasList,
+		const char *name, const char *value);
+
+void printAliases(const struct AliasList *aliasList);
+
+>>>>>>> 7b642c542c2203b26f59ddb632fa9708ce6fbefe
 #endif

@@ -4,7 +4,7 @@
 * CheckBuiltin - checks if the command is a built-in function and executes it
 * @cmd: tokenized commands
 * @inputLine: input read from stdin
-*
+* @struct BuiltIn - Defines built-in commands.
 * Return: 1 if executed, 0 if not
 */
 int CheckBuiltin(char **cmd, char *inputLine)
